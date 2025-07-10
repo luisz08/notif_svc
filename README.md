@@ -470,10 +470,8 @@ GET /
 **Response:**
 ```json
 {
-  "service": "Python Notification Service",
-  "version": "1.0.0",
-  "status": "running",
-  "timestamp": "2025-01-08T00:00:00Z"
+  "message": "Python Notification Service",
+  "version": "1.0.0"
 }
 ```
 
@@ -486,21 +484,21 @@ GET /health
 ```json
 {
   "status": "healthy",
-  "database": "connected",
-  "scheduler": "running"
+  "timestamp": "2025-01-08T00:00:00.000Z"
 }
 ```
 
-### Notification Management
+### Event Management
 
-#### Send Notification
+#### Create Real-Time Event
 ```bash
-POST /events/send
+POST /events/real-time
 Content-Type: application/json
 
 {
-  "notification_id": "user_signup",
-  "event_data": {
+  "source": "user_service",
+  "event_type": "signup",
+  "data": {
     "user_name": "John Doe",
     "user_email": "john@example.com",
     "service_name": "MyApp",
@@ -514,130 +512,86 @@ Content-Type: application/json
 **Response:**
 ```json
 {
-  "request_id": "uuid-request-id",
-  "results": [
-    {
-      "channel": "email",
-      "status": "sent",
-      "message": "Email notification sent successfully"
-    },
-    {
-      "channel": "slack",
-      "status": "sent",
-      "message": "Slack notification sent successfully"
-    }
-  ],
-  "success": true,
-  "message": "Notification sent successfully to 2 channels"
+  "status": "success",
+  "message": "Real-time event processed successfully",
+  "event_id": "uuid-event-id"
 }
 ```
 
-#### Send User Signup Notification (Example)
+#### Create Scheduled Event
 ```bash
-POST /events/examples/user-signup
+POST /events/scheduled
 Content-Type: application/json
 
 {
-  "user_name": "Jane Smith",
-  "user_email": "jane@example.com",
-  "service_name": "TestApp"
-}
-```
-
-#### Send Daily Statistics Report (Example)
-```bash
-POST /events/examples/daily-stats
-```
-
-### Registry Management
-
-#### List All Registered Notifications
-```bash
-GET /registry/notifications
-```
-
-**Response:**
-```json
-{
-  "notifications": [
-    {
-      "id": "user_signup",
-      "name": "User Signup Notification",
-      "description": "Sent when a new user signs up",
-      "channels": ["email", "slack"],
-      "template_id": "user_welcome",
-      "event_source": "realtime",
-      "deduplication_policy": "time_based",
-      "enabled": true
-    }
-  ]
-}
-```
-
-#### Get Specific Notification
-```bash
-GET /registry/notifications/{notification_id}
-```
-
-#### Register New Notification
-```bash
-POST /registry/notifications
-Content-Type: application/json
-
-{
-  "id": "password_reset",
-  "name": "Password Reset Notification",
-  "description": "Sent when user requests password reset",
-  "channels": ["email"],
-  "template_id": "password_reset",
-  "event_source": "realtime",
-  "deduplication_policy": "content_based",
+  "source": "daily_stats_service",
+  "cron": "0 9 * * *",
+  "data": {
+    "query": "SELECT COUNT(*) FROM users WHERE created_at >= CURRENT_DATE",
+    "recipients": ["admin@example.com"]
+  },
   "enabled": true
 }
 ```
 
-### Template Management
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Scheduled event created successfully",
+  "event_id": "uuid-event-id"
+}
+```
 
-#### List All Templates
+#### List Scheduled Events
 ```bash
-GET /registry/templates
+GET /events/scheduled
 ```
 
 **Response:**
 ```json
 {
-  "templates": [
+  "status": "success",
+  "events": [
     {
-      "id": "user_welcome",
-      "name": "User Welcome",
-      "subject": "Welcome {{ user_name }}!",
-      "body": "Hello {{ user_name }}, welcome to {{ service_name }}!",
-      "variables": ["user_name", "service_name"]
+      "id": "uuid-event-id",
+      "type": "scheduled",
+      "data": {
+        "source": "daily_stats_service",
+        "cron": "0 9 * * *",
+        "query": "SELECT COUNT(*) FROM users WHERE created_at >= CURRENT_DATE"
+      },
+      "created_at": "2025-01-08T00:00:00.000Z",
+      "processed": false
     }
   ]
 }
 ```
 
-#### Get Template Content
+### Registry Management
+
+#### List Event Sources
 ```bash
-GET /registry/templates/{template_id}
+GET /registry/event-sources
 ```
 
-#### Create New Template
-```bash
-POST /registry/templates
-Content-Type: application/json
-
+**Response:**
+```json
 {
-  "id": "password_reset",
-  "name": "Password Reset",
-  "subject": "Password Reset Request for {{ service_name }}",
-  "body": "Hello {{ user_name }}, click here to reset your password: {{ reset_link }}",
-  "variables": ["user_name", "service_name", "reset_link"]
+  "sources": [
+    {
+      "id": "realtime",
+      "name": "Real-time Event Source",
+      "description": "Processes events immediately as they arrive"
+    },
+    {
+      "id": "scheduled",
+      "name": "Scheduled Event Source", 
+      "description": "Processes events based on cron schedules"
+    }
+  ]
 }
 ```
-
-### Channel Management
 
 #### List Available Channels
 ```bash
@@ -664,30 +618,19 @@ GET /registry/channels
 }
 ```
 
-### Statistics and Monitoring
-
-#### Get Service Statistics
+#### List Templates
 ```bash
-GET /system/stats
+GET /registry/templates
 ```
 
 **Response:**
 ```json
 {
-  "notifications": {
-    "total": 1250,
-    "sent": 1200,
-    "failed": 30,
-    "duplicate": 20
-  },
-  "channels": {
-    "email": 800,
-    "slack": 400
-  },
-  "events": {
-    "processed": 1100,
-    "pending": 5
-  }
+  "templates": [
+    "user_welcome_email",
+    "user_welcome_slack_message",
+    "daily_statistics_report"
+  ]
 }
 ```
 

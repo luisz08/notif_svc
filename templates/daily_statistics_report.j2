@@ -1,0 +1,25 @@
+Daily Statistics Report for {{ date }}
+
+Key Metrics:
+• Total Users: {{ total_users }}
+• New Signups: {{ new_signups }}
+• Active Users: {{ active_users }}
+• Total Notifications Sent: {{ notifications_sent }}
+
+Performance:
+• Average Response Time: {{ avg_response_time }}ms
+• Success Rate: {{ success_rate }}%
+
+System Health:
+• CPU Usage: {{ cpu_usage }}%
+• Memory Usage: {{ memory_usage }}%
+• Disk Usage: {{ disk_usage }}%
+
+{% if alerts %}
+Alerts:
+{% for alert in alerts %}
+• {{ alert }}
+{% endfor %}
+{% endif %}
+
+Report generated at: {{ report_time }}
